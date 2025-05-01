@@ -60,3 +60,4 @@ for i in range(1, 4):
 # Render
 dot.format = 'png'
 dot.render('decentralized_power_system_graphviz', view=True)
+Install via pip install graphviz)
