@@ -1,0 +1,62 @@
+from graphviz import Digraph
+
+# Create Digraph
+dot = Digraph(comment='Decentralized Power System')
+
+# Main System Box
+dot.attr(label='SYSTEM', labelloc='t', fontsize='20')
+
+# Subgraph: Sources
+with dot.subgraph(name='cluster_sources') as src:
+    src.attr(label='Sources', color='skyblue')
+    for i in range(1, 4):
+        src.node(f'S{i}', f'S{i}')
+    src.attr(style='rounded')
+
+# Subgraph: Storage Units
+with dot.subgraph(name='cluster_storage') as store:
+    store.attr(label='Storage units', color='blue')
+    for i in range(1, 4):
+        store.node(f'B{i}', f'B{i}')
+    store.attr(style='rounded')
+
+# Subgraph: Distributors
+with dot.subgraph(name='cluster_distributors') as dist:
+    dist.attr(label='Distributors\nNetwork', color='green')
+    for i in range(1, 4):
+        dist.node(f'D{i}', f'')
+    dist.attr(style='rounded')
+
+# Subgraph: Loads
+with dot.subgraph(name='cluster_loads') as load:
+    load.attr(label='Loads', color='red')
+    for i in range(1, 4):
+        load.node(f'L{i}', f'L{i}')
+    load.attr(style='rounded')
+
+# Global Source and Load
+dot.node('SG', 'SG')
+dot.node('LG', 'LG')
+
+# Connect SG to Sources and Storage Units
+for i in range(1, 4):
+    dot.edge('SG', f'S{i}', label='c(S{})\nw=0'.format(i), style='dashed')
+    dot.edge('SG', f'B{i}', label='ā(B{})\nw=2'.format(i), style='dashed')
+
+# Connect Storage Units to LG
+for i in range(1, 4):
+    dot.edge(f'B{i}', 'LG', label='ĉ(B{})\nw=2'.format(i), style='dashed')
+
+# Connect LG to Loads
+for i in range(1, 4):
+    dot.edge(f'L{i}', 'LG', label='c(L{})\nw=0'.format(i), style='dashed')
+
+# Connect Loads, Sources, Storage to Distributors
+for i in range(1, 4):
+    dot.edge(f'S{i}', 'D1', label='w=0')
+    dot.edge(f'B{i}', 'D1', label='w=1')
+    dot.edge(f'D1', f'L{i}', label='w=0')
+
+# Render
+dot.format = 'png'
+dot.render('decentralized_power_system_graphviz', view=True)
