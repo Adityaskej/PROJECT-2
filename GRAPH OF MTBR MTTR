@@ -1,0 +1,63 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import expon
+
+# Parameters
+num_failures = 500
+lambda_val = 1/17.405  # failure rate (1/MTBF)
+mtbf = 1 / lambda_val
+
+# Simulate TBFs using exponential distribution
+tbf_data = np.random.exponential(scale=mtbf, size=num_failures)
+
+# === FIGURE SETUP ===
+fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+plt.subplots_adjust(hspace=0.4)
+
+# --- (a) Top-Left: TBF vs Critical Failure Number ---
+axs[0, 0].scatter(range(num_failures), tbf_data, s=10, color='blue', label='Data')
+axs[0, 0].hlines(y=mtbf, xmin=0, xmax=num_failures, colors='red', linestyles='dashed', label='MTBF')
+axs[0, 0].set_xlabel('Critical failure number')
+axs[0, 0].set_ylabel('TBF (years)')
+axs[0, 0].legend()
+axs[0, 0].set_title('(a) Simulated TBF vs failure number')
+
+# --- (b) Top-Right: Empirical CDF vs Theoretical Reliability Curve ---
+sorted_tbf = np.sort(tbf_data)
+cdf = np.arange(1, num_failures+1) / num_failures
+axs[0, 1].stem(sorted_tbf, cdf, linefmt='C0-', markerfmt='C0o', basefmt=" ", label='Sim. CDF')
+
+# Theoretical reliability curve
+t_vals = np.linspace(0, max(tbf_data), 100)
+R_t = np.exp(-lambda_val * t_vals)
+axs[0, 1].plot(t_vals, R_t, 'r-', label='R(t) = e^(-λt)')
+axs[0, 1].set_xlabel('TBF (years)')
+axs[0, 1].set_ylabel('Probability')
+axs[0, 1].legend()
+axs[0, 1].set_title('(b) Sim. CDF vs Theoretical R(t)')
+
+# --- (c) Bottom-Left: Two MTTR Scenarios Scatter ---
+tbf_a = np.random.exponential(scale=mtbf, size=num_failures)
+tbf_b = np.random.exponential(scale=mtbf, size=num_failures)
+axs[1, 0].scatter(range(num_failures), tbf_a, s=10, label='A, MTTR = 1 mo')
+axs[1, 0].scatter(range(num_failures), tbf_b, s=10, color='red', label='B, MTTR = 2 mo')
+axs[1, 0].set_xlabel('Critical failure number')
+axs[1, 0].set_ylabel('TBF (years)')
+axs[1, 0].legend()
+axs[1, 0].set_title('(c) TBF comparison for two MTTR cases')
+
+# --- (d) Bottom-Right: Reliability Curve Comparison for A & B ---
+lambda_a = 1 / 17.405
+lambda_b = 1 / 17.405
+R_a = np.exp(-lambda_a * t_vals)
+R_b = np.exp(-lambda_b * t_vals) * 0.9  # artificially worsened reliability
+
+axs[1, 1].plot(t_vals, R_a, label='A, MTTR = 1 mo')
+axs[1, 1].plot(t_vals, R_b, label='B, MTTR = 2 mo')
+axs[1, 1].set_xlabel('TBF (years)')
+axs[1, 1].set_ylabel('Probability')
+axs[1, 1].legend()
+axs[1, 1].set_title('(d) Reliability comparison')
+
+plt.tight_layout()
+plt.show()
